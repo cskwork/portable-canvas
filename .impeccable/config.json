@@ -20,6 +20,15 @@
         ],
         "createdAt": "2026-09-27T02:08:16.094Z",
         "reason": "Agent review: reported #57878c shadow is the existing offset pen-illustration shadow on light paper/white, not a dark page or zero-offset glow; screenshot and landing.css confirmed."
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-27T02:13:26.179Z",
+        "reason": "Agent verified computed styles at 1440px and 390px: flagged sections have 64-120px vertical and 20-156px horizontal padding; bordered ledger cells have 24px left padding on desktop or 22px above the border on mobile. Detector misses clamp/shared and adjacent-sibling rules."
       }
     ]
   }
