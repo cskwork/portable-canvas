@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-27T01:16:38.949Z",
+  "browser": "Ego Lite Chromium",
+  "receipts": [
+    {
+      "check": "Stylus pressure and autosave",
+      "passed": true,
+      "pressures": [
+        0.2,
+        0.8,
+        0.5
+      ],
+      "points": 18
+    },
+    {
+      "check": "Finger touch drawing and autosave",
+      "passed": true
+    },
+    {
+      "check": "Pen-only mode ignores finger contact",
+      "passed": true
+    },
+    {
+      "check": "eraser",
+      "passed": true
+    },
+    {
+      "check": "undo",
+      "passed": true
+    },
+    {
+      "check": "redo",
+      "passed": true
+    },
+    {
+      "check": "backup",
+      "passed": true
+    },
+    {
+      "check": "invalid",
+      "passed": true
+    },
+    {
+      "check": "failedSwitch",
+      "passed": true
+    },
+    {
+      "check": "retry",
+      "passed": true
+    },
+    {
+      "check": "retention",
+      "passed": true
+    },
+    {
+      "check": "conflict",
+      "passed": true
+    },
+    {
+      "check": "20,000-point sample import, render and committed save",
+      "passed": true,
+      "elapsedMs": 65
+    }
+  ],
+  "limitations": [
+    "Synthetic stylus and touch inputs do not establish physical iPad or Android performance."
+  ]
+}
