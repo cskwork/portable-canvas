@@ -29,6 +29,25 @@
         ],
         "createdAt": "2026-09-27T02:13:26.179Z",
         "reason": "Agent verified computed styles at 1440px and 390px: flagged sections have 64-120px vertical and 20-156px horizontal padding; bordered ledger cells have 24px left padding on desktop or 22px above the border on mobile. Detector misses clamp/shared and adjacent-sibling rules."
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "demo.html",
+          "index.html"
+        ],
+        "createdAt": "2026-09-27T02:21:55.892Z",
+        "reason": "Agent review: DESIGN.md explicitly defines a warm-paper reading desk; docs/landing-design.md preserves the same paper and ink palette. Both surfaces predate the logo change, and desktop/mobile screenshots confirm this deliberate reading context."
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "files": [
+          "demo.html"
+        ],
+        "createdAt": "2026-09-27T02:21:55.914Z",
+        "reason": "Agent review: system Arial/Helvetica body text with Georgia editorial headings is the existing reading-demo stack from c81e57d. DESIGN.md requires no external fonts. The logo-only change preserves that zero-font-download implementation."
       }
     ]
   }
