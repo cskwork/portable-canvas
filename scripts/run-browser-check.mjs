@@ -8,9 +8,9 @@ const script = `
 const task = await taskSpace(${existingSpace || JSON.stringify("Portable Canvas regression")});
 console.log({ spaceId: task.spaceId });
 const { runBrowserChecks } = await import(${JSON.stringify(moduleURL)});
-await runBrowserChecks({ taskSpace, spaceId: task.spaceId, base: 'http://127.0.0.1:4173', outputDirectory: ${JSON.stringify(outputDirectory)} });
+await runBrowserChecks({ taskSpace, spaceId: task.spaceId, base: 'http://127.0.0.1:4173/demo.html', outputDirectory: ${JSON.stringify(outputDirectory)} });
 const { runPenUiChecks } = await import(${JSON.stringify(penModuleURL)});
-await runPenUiChecks({ taskSpace, spaceId: task.spaceId, base: 'http://127.0.0.1:4173', outputDirectory: ${JSON.stringify(outputDirectory)} });
+await runPenUiChecks({ taskSpace, spaceId: task.spaceId, base: 'http://127.0.0.1:4173/demo.html', outputDirectory: ${JSON.stringify(outputDirectory)} });
 ${existingSpace ? "" : "await task.finish({ keep: [] });"}
 `;
 const result = spawnSync("ego-browser", ["nodejs"], {

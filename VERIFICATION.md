@@ -43,3 +43,9 @@ The user confirmed the Millie-supplied UI screenshot published on 2024-12-18: ht
 - Desktop and 390px phone screenshots were inspected. At 390px the toolbar remained one 52px-high row. At 320px it scrolls internally; the close control remains pinned. The settings pane stays within a 390px-high landscape viewport and scrolls internally. No horizontal page overflow at any checked size.
 
 Latest evidence: `evidence/pen-ui-checks.json`, `evidence/pen-ui-layouts.json`, `evidence/pen-ui-desktop.png`, and `evidence/pen-ui-mobile.png`.
+
+## Landing and public delivery preparation
+
+Landing UI/UX was delegated to `claude-opus-5-5` with `--effort medium`, as requested. The delegate produced the landing, its CSS/JS, favicon, product screenshots and design notes. The coordinator verified the generated files and confirmed `demo.html` is byte-identical to the former demo `index.html` at commit 21f8aa6.
+
+Desktop and phone landing screenshots were inspected. All product screenshots loaded; 320px and390px viewports had no horizontal overflow. The primary CTA opened the working drawing demo. Copy-code success and permission-failure fallback were tested with controlled clipboard implementations. No third-party reference image, credentials or environment file is included in the static build. `npm run build` copies an explicit public-asset list into `dist/`.
