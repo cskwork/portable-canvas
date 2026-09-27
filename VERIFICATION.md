@@ -49,3 +49,9 @@ Latest evidence: `evidence/pen-ui-checks.json`, `evidence/pen-ui-layouts.json`, 
 Landing UI/UX was delegated to `claude-opus-5-5` with `--effort medium`, as requested. The delegate produced the landing, its CSS/JS, favicon, product screenshots and design notes. The coordinator verified the generated files and confirmed `demo.html` is byte-identical to the former demo `index.html` at commit 21f8aa6.
 
 Desktop and phone landing screenshots were inspected. All product screenshots loaded; 320px and390px viewports had no horizontal overflow. The primary CTA opened the working drawing demo. Copy-code success and permission-failure fallback were tested with controlled clipboard implementations. No third-party reference image, credentials or environment file is included in the static build. `npm run build` copies an explicit public-asset list into `dist/`.
+
+## Tool switching correction
+
+A different tool now selects that tool and closes the settings panel. Tapping the selected tool toggles settings. The browser regression failed against the former behavior, then passed after the change for pen, fountain, highlighter and eraser, including switching while a panel was open. All 10 brush/UI cases and 17 Node tests passed. Browser test helpers now reload with cache disabled so a reused test page cannot mask source changes.
+
+Two landing-only design detector false positives were reviewed and narrowly recorded in `.impeccable/config.json`: the body's clipping is for decorative illustrations, not interactive popovers, and the reported shadow belongs to a light-background pen illustration rather than a dark glowing surface. No design was changed or unresolved finding left standing for these two reports.

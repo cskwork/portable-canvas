@@ -17,6 +17,8 @@ export async function runPenUiChecks({
     console.log(row);
   };
   await p.goto(base);
+  await p.cdp("Network.setCacheDisabled", { cacheDisabled: true });
+  await p.reload();
   await p.cdp("Emulation.setDeviceMetricsOverride", {
     width: 1500,
     height: 900,
@@ -48,6 +50,32 @@ export async function runPenUiChecks({
     }, database);
   }
   await mountTest();
+  for (const [name, tool] of [
+    ["Fountain pen", "fountain"],
+    ["Highlighter", "highlighter"],
+    ["Eraser", "eraser"],
+    ["Pen", "pen"],
+  ]) {
+    await p.click(`loc=css:button[aria-label="${name}"]`);
+    assert.deepEqual(
+      await p.evaluate(() => ({
+        tool: portableCanvas.tool,
+        hidden: portableCanvas.panel.hidden,
+      })),
+      { tool, hidden: true },
+    );
+    await p.click(`loc=css:button[aria-label="${name}"]`);
+    assert.equal(await p.evaluate(() => portableCanvas.panel.hidden), false);
+  }
+  await p.click('loc=css:button[aria-label="Close settings"]');
+  pass(
+    "Switching tools only selects; tapping the selected tool opens settings",
+  );
+  async function openToolSettings(name) {
+    await p.click(`loc=css:button[aria-label="${name}"]`);
+    if (await p.evaluate(() => portableCanvas.panel.hidden))
+      await p.click(`loc=css:button[aria-label="${name}"]`);
+  }
   await p.click('loc=css:button[aria-label="Pen"]');
   await p.evaluate(() => {
     const r = portableCanvas.root;
@@ -69,7 +97,7 @@ export async function runPenUiChecks({
     ]),
     ["14px", "70%"],
   );
-  await p.click('loc=css:button[aria-label="Fountain pen"]');
+  await openToolSettings("Fountain pen");
   assert.equal(
     await p.evaluate(
       () => portableCanvas.root.querySelector(".sensitivity").hidden,
@@ -88,6 +116,7 @@ export async function runPenUiChecks({
     }
   });
   await p.click('loc=css:button[aria-label="Purple ink"]');
+  await p.click('loc=css:button[aria-label="Pen"]');
   await p.click('loc=css:button[aria-label="Pen"]');
   const expectedProfiles = await p.evaluate(
     () => portableCanvas.settings.tools,
@@ -121,7 +150,7 @@ export async function runPenUiChecks({
     expectedProfiles,
   );
   pass("Independent pen profiles survive reload");
-  await p.click('loc=css:button[aria-label="Highlighter"]');
+  await openToolSettings("Highlighter");
   await p.evaluate(() => {
     for (const [id, value] of [
       ["width", 24],
@@ -186,7 +215,7 @@ export async function runPenUiChecks({
     alphaState.crossing,
   );
   pass("Styled drawing and opacity survive IndexedDB reload");
-  await p.click('loc=css:button[aria-label="Eraser"]');
+  await openToolSettings("Eraser");
   assert.equal(
     await p.evaluate(
       () =>

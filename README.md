@@ -52,6 +52,6 @@ For repeatable real-browser checks, install Ego Lite / `ego-browser`, run `npm s
 
 ### Drawing tools
 
-Tap the pen icon to draw, then tap a tool to open its settings. Pen, fountain pen, highlighter and eraser have separate remembered settings. The white panel offers width and, for ink tools, opacity and colors; fountain pen also offers pressure sensitivity. Closing settings keeps drawing active. The toolbar provides undo, redo, save and close; pen-only input is in settings. Narrow screens keep the toolbar on one horizontally scrollable row.
+Tap the pen icon to draw. Tapping a different tool selects it and closes any settings panel; tapping the selected tool toggles its settings. Pen, fountain pen, highlighter and eraser have separate remembered settings. The white panel offers width and, for ink tools, opacity and colors; fountain pen also offers pressure sensitivity. Closing settings keeps drawing active. The toolbar provides undo, redo, save and close; pen-only input is in settings. Narrow screens keep the toolbar on one horizontally scrollable row.
 
 Old drawings and version-1 backups remain compatible. New translucent strokes apply opacity once over the whole stroke, including crossings. Physical stylus feel still needs testing on the intended device.

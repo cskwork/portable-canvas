@@ -67,7 +67,7 @@ export class PortableCanvas {
         const action = b.dataset.action;
         if (TOOLS.includes(action)) {
           this.finish();
-          this.panel.hidden = this.tool === action ? !this.panel.hidden : false;
+          this.panel.hidden = this.tool === action ? !this.panel.hidden : true;
           this.tool = action;
           this.updateTools();
         } else if (action === "close-panel") this.panel.hidden = true;
