@@ -10,7 +10,7 @@ npm test
 npm start
 ```
 
-Requires Node.js 22+ and Python 3 for the development server. Open http://localhost:4173. No build step or runtime dependencies. `fake-indexeddb` is used only in Node tests. Serve over HTTP or HTTPS; opening the HTML directly as a file will not load ES modules reliably.
+Requires Node.js 22+ and Python 3 for the development server. Open http://localhost:4173 for the landing page or http://localhost:4173/demo.html for the drawing demo. No build step or runtime dependencies. `fake-indexeddb` is used only in Node tests. Serve over HTTP or HTTPS; opening the HTML directly as a file will not load ES modules reliably.
 
 ## Embed
 

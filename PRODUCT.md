@@ -14,7 +14,7 @@ People drawing notes over a web page with Apple Pencil, an Android stylus, finge
 
 Embeddable drawing widget plus standalone demo. Local IndexedDB storage, compact stroke data, autosave after drawing and periodic checkpoints, visible save status, undo/redo, eraser, color and width, optional pen-only input, export/import. Configurable retention defaults to 50 recently used pages and 50 MB, evicting least recently used saved drawings. Only the active page's strokes are loaded in memory.
 
-An iframe workspace supports sites that allow embedding. Cross-origin drawings are viewport overlays, not content-anchored annotations, and internal navigation cannot be tracked reliably. No extension, proxy, cloud account, or hosted deployment is included. Delivery is a new private cskwork/portable-canvas GitHub repository with verified commit and push.
+An iframe workspace supports sites that allow embedding. Cross-origin drawings are viewport overlays, not content-anchored annotations, and internal navigation cannot be tracked reliably. No extension, proxy, cloud account, or hosted deployment is included. Delivery is the user-authorized public cskwork/portable-canvas GitHub repository, a Vercel landing page and demo, and a project entry in the existing portfolio.
 
 ## Stack
 
