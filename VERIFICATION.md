@@ -29,3 +29,17 @@ Physical Apple Pencil and Android stylus latency, pressure behavior and palm rej
 Cross-origin iframe marks are screen overlays and cannot reliably follow internal navigation or scrolling. Some websites forbid embedding. The host widget uses geometric document coordinates, not text anchors; layout changes can move content beneath existing marks.
 
 Browser storage is origin/profile/device specific and can be cleared or evicted. Shutdown saves are best effort. Exports are the backup mechanism. No public site was deployed.
+
+## Confirmed drawing-UI revision
+
+The user confirmed the Millie-supplied UI screenshot published on 2024-12-18: https://www.donga.com/news/Economy/article/all/20241218/130672732/2 . The reference was inspected visually; the current Millie app was not operated. The implementation follows the shown white icon bar, yellow slider controls, per-tool panels and round palette. The third-party reference image is not distributed in this repository.
+
+- Current Node suite: 17 passing tests, adding optional brush fields, legacy width behavior, isolated tool preferences and per-stroke compositing checks.
+- Existing 13 browser regressions passed with the new toolbar. The new 9-case brush/UI suite passed: panel toggling, keyboard/range controls, per-tool reload persistence, real highlighter/eraser input, pressure sensitivity and styled-drawing restoration. `npm run test:browser` now runs both suites.
+- A legacy pen/eraser drawing saved before the change was loaded afterward with identical stroke data and identical total raster alpha (4,056,529) at the captured viewport.
+- A self-crossing 35% highlighter stroke produced alpha 89 both along the line and at its crossing, and restored the same value after reload.
+- Pen sample widths were 40/40 device pixels at low/high pressure; a sensitive fountain sample produced 8/40, and sensitivity zero returned 40/40.
+- The final 20,000-point styled sample import/render/save completed in 65 ms in the local run. This is a desktop observation, not a hardware latency guarantee.
+- Desktop and 390px phone screenshots were inspected. At 390px the toolbar remained one 52px-high row. At 320px it scrolls internally; the close control remains pinned. The settings pane stays within a 390px-high landscape viewport and scrolls internally. No horizontal page overflow at any checked size.
+
+Latest evidence: `evidence/pen-ui-checks.json`, `evidence/pen-ui-layouts.json`, `evidence/pen-ui-desktop.png`, and `evidence/pen-ui-mobile.png`.

@@ -18,3 +18,11 @@ Use a stable page key chosen by the host. Query strings are included by default;
 - `destroy()`: finish and save, then remove listeners, timers and widget. Resolves false and leaves the widget available if save fails. Host must preserve the page or offer export when false.
 
 `new DrawingStore(databaseName)` supports `load(key)`, `recents()`, `save(key, strokes, expectedVersion, settings)`, and `close()`. Store writes are atomic and versions must match. Raw storage records are implementation details; use backup format version 1 for interchange.
+
+## Brush data compatibility
+
+Backup format remains version 1. Stroke tools are `pen`, `fountain`, `highlighter`, and `eraser`. Optional `opacity` and `sensitivity` are finite numbers from 0 to 1; optional `brushVersion` is 2. Invalid fields are rejected before any drawing is replaced. Existing strokes without these fields retain their original pressure-width behavior, with opacity defaulting to 1. No database migration is required.
+
+New strokes carry `brushVersion: 2`: pen and highlighter use a constant width, while fountain width responds to pressure and the saved sensitivity. Erasing removes ink. Opacity is composited once per stroke, so a single translucent stroke does not darken at segment joints or self-crossings. Separate strokes can overlap and darken naturally. Saved and restored strokes use the same rendering path.
+
+Per-tool settings are stored under `portable-canvas-settings.tools` without changing retention settings. Rendering uses three viewport-sized canvases, capped at device pixel ratio 2, rather than page-height bitmaps. Pointer movement updates the current stroke mask and composites it over the committed bitmap; history is replayed only when needed for resize, scroll, restoration or history changes. Replayed modern strokes composite only their clipped bounds.

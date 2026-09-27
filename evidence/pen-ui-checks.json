@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-27T01:38:43.416Z",
+  "browser": "Ego Lite Chromium",
+  "receipts": [
+    {
+      "check": "Tool-specific sliders, palette and keyboard adjustment",
+      "passed": true
+    },
+    {
+      "check": "Tool tap toggles settings; panel close preserves drawing mode",
+      "passed": true
+    },
+    {
+      "check": "Independent pen profiles survive reload",
+      "passed": true
+    },
+    {
+      "check": "Highlighter opacity applied once per stroke",
+      "passed": true,
+      "crossingAlpha": 89,
+      "normalAlpha": 89,
+      "maxAlpha": 89
+    },
+    {
+      "check": "Styled drawing and opacity survive IndexedDB reload",
+      "passed": true
+    },
+    {
+      "check": "Eraser toolbar input removes ink and undo restores its transparency",
+      "passed": true
+    },
+    {
+      "check": "Pen, fountain and sensitivity produce distinct pressure behavior",
+      "passed": true,
+      "pen": [
+        40,
+        40
+      ],
+      "fountain": [
+        8,
+        40
+      ],
+      "insensitive": [
+        40,
+        40
+      ],
+      "erased": 0,
+      "restored": 40,
+      "sampleMs": 65
+    },
+    {
+      "check": "Eraser with optional style data and undo remain correct",
+      "passed": true
+    },
+    {
+      "check": "Close returns to the single pen icon",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Hardware stylus feel not tested. Reference is user-confirmed 2024 published screenshot, not latest-app hands-on."
+  ]
+}

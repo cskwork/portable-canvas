@@ -105,3 +105,40 @@ test("continuing a checkpointed stroke marks new points unsaved only once", () =
   assert.equal(c.revision, c.savedRevision + 2);
   assert.equal(c.active.stroke.points.length, 3);
 });
+
+test("opacity is applied once when compositing a stroke mask and reset afterward", () => {
+  const c = instance({});
+  c.mask = {};
+  const calls = [];
+  const context = {
+    setTransform() {},
+    drawImage() {
+      calls.push({
+        alpha: this.globalAlpha,
+        operation: this.globalCompositeOperation,
+      });
+    },
+  };
+  c.composite(context, { ...stroke, opacity: 0.35 });
+  c.composite(context, { ...stroke, tool: "eraser", opacity: 0.2 });
+  assert.deepEqual(calls, [
+    { alpha: 0.35, operation: "source-over" },
+    { alpha: 1, operation: "destination-out" },
+  ]);
+  assert.equal(context.globalAlpha, 1);
+  assert.equal(context.globalCompositeOperation, "source-over");
+});
+
+test("invalid optional brush fields reject before replacing existing work", () => {
+  const c = instance({});
+  const before = structuredClone(c.strokes);
+  assert.throws(() =>
+    c.import({
+      format: "portable-canvas",
+      version: 1,
+      strokes: [{ ...stroke, opacity: Infinity }],
+    }),
+  );
+  assert.deepEqual(c.strokes, before);
+  assert.equal(c.revision, 1);
+});

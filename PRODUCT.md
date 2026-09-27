@@ -30,4 +30,4 @@ Keep drawing responsive. Report failed saves explicitly. Preserve unsaved work d
 
 ## Reading experience reference
 
-The user likes the simple drawing icon and tool variety in Millie's reading app. Apply that general principle with an original interface: one pen button at rest, with color, four widths, eraser, undo and redo available while drawing. Keep errors and unsaved status visible, and hide the routine saved message when drawing is off.
+The approved Millie reading-app screenshot guides the drawing controls: one small pen button at rest, a thin white icon toolbar while drawing, and a rounded white settings panel above it. Four working tools are pen, fountain pen, highlighter, and eraser. Each remembers its own width, color, opacity, and fountain pressure sensitivity locally. Undo, redo, save, close, and optional pen-only input remain available. No selection, laser, or cloud placeholders are included.

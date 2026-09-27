@@ -1,5 +1,7 @@
 # Design direction
 
-A quiet reading desk: warm paper, dark ink, a restrained rust pen, and a pale olive utility rail. Editorial serif headings give the page a clear starting point; compact sans-serif controls stay subordinate to the drawing surface. The demo is a working reading page, a dot-grid sheet, and a website frame rather than a product landing page.
+The demo remains a quiet reading desk with warm paper and editorial headings. Drawing controls follow the approved Millie screenshot: white surfaces, thin dark original SVG icons, restrained borders and shadow, yellow selection and slider accents, and a circular color palette.
 
-The pen remains visible. Tools appear only while drawing. On narrow screens the utility rail becomes a drawer and the toolbar wraps above the pen. Controls target at least 44 CSS pixels, keyboard focus is visible, and save messages use a live region. No external fonts, animation libraries or online assets are required.
+One pen icon remains at rest. Drawing mode reveals a single toolbar row. A tool tap selects it and opens its settings above the toolbar; tapping the selected tool toggles that panel. The panel has a Korean tool title, close control, pixel width, opacity, circular colors and custom color input. Fountain pen adds pressure sensitivity; eraser shows width only. Pen-only input is in the panel. Closing the panel keeps drawing enabled; closing drawing returns to the single pen icon.
+
+Controls have 44px tap targets and visible keyboard focus. At 390px the toolbar fits one row; at 320px it scrolls horizontally with the close control pinned at the right. The palette can scroll on the narrowest screens. The panel stays within the viewport and scrolls vertically in short landscape windows. Save failures remain visible in a live region. No external fonts or runtime dependencies are required.

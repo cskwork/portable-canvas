@@ -3,10 +3,12 @@ import {
   pageKey,
   validateDrawing,
   validatedSettings,
+  toolSettings,
+  TOOLS,
+  strokeWidth,
 } from "./model.js";
 import { DrawingStore } from "./storage.js";
-const pen =
-  '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 4 5 5-11 11-6 1 1-6Z M13 6l5 5"/></svg>';
+import { markup, labels } from "./ui.js";
 export function mount(options = {}) {
   return new PortableCanvas(options);
 }
@@ -44,12 +46,16 @@ export class PortableCanvas {
       "position:fixed;inset:0;pointer-events:none;z-index:2147483000";
     target.append(this.host);
     this.root = this.host.attachShadow({ mode: "open" });
-    this.root.innerHTML = `<style>:host{font:14px system-ui;color:#282b25}*{box-sizing:border-box}canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.controls{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;background:#fffdf7;border:1px solid #d9d6c9;padding:6px;border-radius:18px;box-shadow:0 5px 24px #23251d20;pointer-events:auto;max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center}button,input,select{min-height:44px;border:0;border-radius:11px;background:#eeeee5;color:inherit;font:inherit}button{min-width:44px;padding:8px 12px;cursor:pointer}button:hover{background:#e0e3d3}button[aria-pressed=true]{background:#ad492d;color:white}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ad492d;outline-offset:2px}.toggle{position:absolute;right:24px;bottom:24px;pointer-events:auto;width:56px;height:56px;border-radius:50%;background:#ad492d;color:white;box-shadow:0 4px 16px #25272030}.status{position:absolute;top:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);padding:8px 13px;border-radius:9px;background:#fffdf7eF;text-align:center}.controls[hidden],.status[hidden]{display:none}input[type=color]{width:44px;padding:6px}select{max-width:90px} @media(max-width:700px){.status{top:calc(80px + env(safe-area-inset-top,0px))}.controls{bottom:calc(88px + env(safe-area-inset-bottom,0px));width:max-content;max-width:calc(100vw - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))}.toggle{right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px))}}</style><canvas aria-label="Drawing surface"></canvas><div class="status" role="status" aria-live="polite">Opening local storage…</div><div class="controls" role="toolbar" aria-label="Drawing tools" hidden><button data-action="pen" aria-label="Pen" aria-pressed="true">${pen}</button><button data-action="eraser" aria-label="Eraser" aria-pressed="false"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 3 7 7-10 11H6l-4-4Z M7 12l7 7 M11 21h11"/></svg></button><input type="color" aria-label="Ink color" value="${this.settings.color}"><select aria-label="Stroke width"><option value="2">Fine</option><option value="4">Medium</option><option value="8">Broad</option><option value="16">Bold</option></select><button data-action="undo" aria-label="Undo"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12"/></svg></button><button data-action="redo" aria-label="Redo"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 5 5 5-5 5m5-5H10a6 6 0 0 0 0 12"/></svg></button><button data-action="save">Save now</button><button data-action="input" aria-pressed="${this.settings.input === "pen"}">Pen only</button></div><button class="toggle" aria-label="Toggle drawing" aria-pressed="false">${pen}</button>`;
+    this.root.innerHTML = markup();
+    this.settings.tools = toolSettings(this.settings.tools, this.settings);
+    this.panel = this.root.querySelector(".panel");
     for (const control of this.root.querySelectorAll("[aria-label]")) {
       control.title = control.getAttribute("aria-label");
     }
     this.canvas = this.root.querySelector("canvas");
     this.ctx = this.canvas.getContext("2d");
+    this.committed = document.createElement("canvas");
+    this.mask = document.createElement("canvas");
     this.statusEl = this.root.querySelector(".status");
     this.toolbar = this.root.querySelector(".controls");
     this.abort = new AbortController();
@@ -59,28 +65,38 @@ export class PortableCanvas {
     for (const b of this.root.querySelectorAll("[data-action]"))
       listen(b, "click", () => {
         const action = b.dataset.action;
-        if (["pen", "eraser"].includes(action)) {
+        if (TOOLS.includes(action)) {
+          this.finish();
+          this.panel.hidden = this.tool === action ? !this.panel.hidden : false;
           this.tool = action;
-          for (const t of this.root.querySelectorAll(
-            "[data-action=pen],[data-action=eraser]",
-          ))
-            t.setAttribute("aria-pressed", String(t.dataset.action === action));
-        } else if (action === "input") {
+          this.updateTools();
+        } else if (action === "close-panel") this.panel.hidden = true;
+        else if (action === "close") this.toggle(false);
+        else if (action === "input") {
           this.settings.input = this.settings.input === "pen" ? "all" : "pen";
-          b.setAttribute("aria-pressed", String(this.settings.input === "pen"));
+          this.updateTools();
           this.persistSettings();
         } else this[action]();
       });
-    listen(this.root.querySelector("input"), "input", (e) => {
-      this.settings.color = e.target.value;
+    for (const field of ["width", "opacity", "sensitivity"]) {
+      listen(this.root.querySelector(`#${field}`), "input", (e) => {
+        this.settings.tools[this.tool][field] =
+          Number(e.target.value) / (field === "width" ? 1 : 100);
+        this.updateTools();
+        this.persistSettings();
+      });
+    }
+    const setColor = (color) => {
+      this.settings.tools[this.tool].color = color;
+      this.updateTools();
       this.persistSettings();
-    });
-    const width = this.root.querySelector("select");
-    width.value = this.settings.width;
-    listen(width, "change", () => {
-      this.settings.width = Number(width.value);
-      this.persistSettings();
-    });
+    };
+    listen(this.root.querySelector("input[type=color]"), "input", (e) =>
+      setColor(e.target.value),
+    );
+    for (const button of this.root.querySelectorAll("[data-color]"))
+      listen(button, "click", () => setColor(button.dataset.color));
+    this.updateTools();
     listen(this.canvas, "pointerdown", (e) => this.down(e));
     listen(this.canvas, "pointermove", (e) => this.move(e));
     listen(this.canvas, "pointerup", (e) => this.up(e));
@@ -98,7 +114,8 @@ export class PortableCanvas {
               element.isContentEditable),
         );
       if (event.key === "Escape" && this.enabled && !editing) {
-        this.toggle(false);
+        if (!this.panel.hidden) this.panel.hidden = true;
+        else this.toggle(false);
       }
     });
     listen(window, "resize", () => this.resize());
@@ -112,6 +129,37 @@ export class PortableCanvas {
     }, 5000);
     this.resize();
     this.ready = this.load(key);
+  }
+  updateTools() {
+    const settings = this.settings.tools[this.tool];
+    this.panel.querySelector("h2").textContent = labels[this.tool];
+    this.panel.querySelector(".sensitivity").hidden = this.tool !== "fountain";
+    this.panel.querySelector(".opacity").hidden = this.tool === "eraser";
+    this.panel.querySelector(".colors").hidden = this.tool === "eraser";
+    for (const tool of TOOLS)
+      this.root
+        .querySelector(`[data-action=${tool}]`)
+        .setAttribute("aria-pressed", String(tool === this.tool));
+    this.root
+      .querySelector("[data-action=input]")
+      .setAttribute("aria-pressed", String(this.settings.input === "pen"));
+    for (const field of ["width", "opacity", "sensitivity"]) {
+      const input = this.root.querySelector(`#${field}`);
+      if (field === "width") input.max = this.tool === "eraser" ? 100 : 64;
+      input.value = settings[field] * (field === "width" ? 1 : 100);
+      input.style.setProperty(
+        "--fill",
+        `${((input.value - input.min) / (input.max - input.min)) * 100}%`,
+      );
+      this.root.querySelector(`#${field}-value`).textContent =
+        `${Math.round(input.value)}${field === "width" ? "px" : "%"}`;
+    }
+    this.root.querySelector("input[type=color]").value = settings.color;
+    for (const button of this.root.querySelectorAll("[data-color]"))
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.color === settings.color.toLowerCase()),
+      );
   }
   status(text) {
     this.statusEl.textContent = text;
@@ -196,7 +244,11 @@ export class PortableCanvas {
     this.root
       .querySelector(".toggle")
       .setAttribute("aria-pressed", String(force));
-    if (!force) this.finish();
+    this.root.querySelector(".toggle").hidden = force;
+    if (!force) {
+      this.panel.hidden = true;
+      this.finish();
+    }
   }
   coords(e) {
     const rect = this.canvas.getBoundingClientRect();
@@ -230,8 +282,8 @@ export class PortableCanvas {
       id: e.pointerId,
       stroke: {
         tool: this.tool,
-        color: this.settings.color,
-        width: this.settings.width,
+        ...this.settings.tools[this.tool],
+        brushVersion: 2,
         points: [this.coords(e)],
       },
     };
@@ -247,7 +299,13 @@ export class PortableCanvas {
     this.redoStack = [];
     this.canvas.setPointerCapture(e.pointerId);
     this.changed();
-    this.drawDot(this.active.stroke, this.active.stroke.points[0]);
+    this.clearCanvas(this.mask);
+    this.drawDot(
+      this.active.stroke,
+      this.active.stroke.points[0],
+      this.mask.getContext("2d"),
+    );
+    this.present();
   }
   move(e) {
     if (!this.active || e.pointerId !== this.active.id) return;
@@ -275,7 +333,9 @@ export class PortableCanvas {
     if (!this.frame)
       this.frame = requestAnimationFrame(() => {
         this.frame = null;
-        for (const [s, a, b] of this.pending || []) this.drawSegment(s, a, b);
+        for (const [s, a, b] of this.pending || [])
+          this.drawSegment(s, a, b, this.mask.getContext("2d"));
+        this.present();
         this.pending = [];
       });
   }
@@ -287,7 +347,12 @@ export class PortableCanvas {
   }
   finish() {
     if (!this.active) return;
+    for (const [s, a, b] of this.pending || [])
+      this.drawSegment(s, a, b, this.mask.getContext("2d"));
+    this.pending = [];
+    this.composite(this.committed.getContext("2d"), this.active.stroke);
     this.active = null;
+    this.present();
     this.changed();
   }
   changed() {
@@ -356,12 +421,21 @@ export class PortableCanvas {
   resize() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     this.dpr = dpr;
-    this.canvas.width = Math.round(innerWidth * dpr);
-    this.canvas.height = Math.round(innerHeight * dpr);
+    for (const canvas of [this.canvas, this.committed, this.mask]) {
+      canvas.width = Math.round(innerWidth * dpr);
+      canvas.height = Math.round(innerHeight * dpr);
+    }
     this.render();
   }
-  prepare(s) {
-    const c = this.ctx;
+  clearCanvas(canvas) {
+    const c = canvas.getContext("2d");
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    if (canvas === this.mask && this.maskBounds)
+      c.clearRect(...this.maskBounds);
+    else c.clearRect(0, 0, canvas.width, canvas.height);
+    if (canvas === this.mask) this.maskBounds = null;
+  }
+  prepare(s, c) {
     c.setTransform(
       this.dpr,
       0,
@@ -370,32 +444,48 @@ export class PortableCanvas {
       this.mode === "document" ? -scrollX * this.dpr : 0,
       this.mode === "document" ? -scrollY * this.dpr : 0,
     );
+    c.globalAlpha = 1;
     c.globalCompositeOperation =
-      s.tool === "eraser" ? "destination-out" : "source-over";
+      c.canvas === this.committed && s.brushVersion !== 2 && s.tool === "eraser"
+        ? "destination-out"
+        : "source-over";
     c.strokeStyle = s.color;
     c.fillStyle = s.color;
     c.lineCap = "round";
     c.lineJoin = "round";
   }
-  drawDot(s, p) {
-    this.prepare(s);
-    this.ctx.beginPath();
-    this.ctx.arc(
-      p[0],
-      p[1],
-      (s.width * (0.35 + p[2] * 0.65)) / 2,
-      0,
-      Math.PI * 2,
-    );
-    this.ctx.fill();
+  drawDot(s, p, c) {
+    this.prepare(s, c);
+    c.beginPath();
+    c.arc(p[0], p[1], strokeWidth(s, p[2]) / 2, 0, Math.PI * 2);
+    c.fill();
   }
-  drawSegment(s, a, b) {
-    this.prepare(s);
-    this.ctx.lineWidth = s.width * (0.35 + ((a[2] + b[2]) / 2) * 0.65);
-    this.ctx.beginPath();
-    this.ctx.moveTo(a[0], a[1]);
-    this.ctx.lineTo(b[0], b[1]);
-    this.ctx.stroke();
+  drawSegment(s, a, b, c) {
+    this.prepare(s, c);
+    c.lineWidth = strokeWidth(s, (a[2] + b[2]) / 2);
+    c.beginPath();
+    c.moveTo(a[0], a[1]);
+    c.lineTo(b[0], b[1]);
+    c.stroke();
+  }
+  composite(c, s) {
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.globalCompositeOperation =
+      s.tool === "eraser" ? "destination-out" : "source-over";
+    c.globalAlpha = s.tool === "eraser" ? 1 : (s.opacity ?? 1);
+    if (this.maskBounds) {
+      const [x, y, width, height] = this.maskBounds;
+      c.drawImage(this.mask, x, y, width, height, x, y, width, height);
+    } else c.drawImage(this.mask, 0, 0);
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = "source-over";
+  }
+  present() {
+    this.clearCanvas(this.canvas);
+    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.globalAlpha = 1;
+    this.ctx.drawImage(this.committed, 0, 0);
+    if (this.active) this.composite(this.ctx, this.active.stroke);
   }
   scheduleRender() {
     if (this.renderFrame) return;
@@ -407,13 +497,46 @@ export class PortableCanvas {
   render() {
     if (!this.ctx) return;
     this.pending = [];
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.clearCanvas(this.committed);
     for (const s of this.strokes) {
-      this.drawDot(s, s.points[0]);
+      if (s.brushVersion !== 2 && s.opacity === undefined) {
+        const c = this.committed.getContext("2d");
+        this.drawDot(s, s.points[0], c);
+        for (let i = 1; i < s.points.length; i++)
+          this.drawSegment(s, s.points[i - 1], s.points[i], c);
+        continue;
+      }
+      this.clearCanvas(this.mask);
+      const [sx, sy] = this.mode === "document" ? [scrollX, scrollY] : [0, 0];
+      let left = Infinity,
+        top = Infinity,
+        right = -Infinity,
+        bottom = -Infinity;
+      for (const [x, y] of s.points) {
+        left = Math.min(left, x);
+        top = Math.min(top, y);
+        right = Math.max(right, x);
+        bottom = Math.max(bottom, y);
+      }
+      const pad = s.width / 2 + 2;
+      const x = Math.max(0, Math.floor((left - pad - sx) * this.dpr));
+      const y = Math.max(0, Math.floor((top - pad - sy) * this.dpr));
+      const width =
+        Math.min(this.mask.width, Math.ceil((right + pad - sx) * this.dpr)) - x;
+      const height =
+        Math.min(this.mask.height, Math.ceil((bottom + pad - sy) * this.dpr)) -
+        y;
+      if (width <= 0 || height <= 0) continue;
+      this.maskBounds =
+        s === this.active?.stroke ? null : [x, y, width, height];
+      const c = this.mask.getContext("2d");
+      this.drawDot(s, s.points[0], c);
       for (let i = 1; i < s.points.length; i++)
-        this.drawSegment(s, s.points[i - 1], s.points[i]);
+        this.drawSegment(s, s.points[i - 1], s.points[i], c);
+      if (s !== this.active?.stroke)
+        this.composite(this.committed.getContext("2d"), s);
     }
+    this.present();
   }
   export() {
     return {
