@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="7" fill="#f7f5ee"/>
+  <title>Portable Canvas</title>
   <path d="M17 5H8a3 3 0 0 0-3 3v17a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-8" stroke="#292d27" stroke-width="2.2" stroke-linecap="round"/>
   <path d="M10 23c3-1 6-1 10-.5" stroke="#ffe900" stroke-width="4" stroke-linecap="round"/>
   <path d="m13 19 1.5-5L24 4.5a2.1 2.1 0 0 1 3 3L17.5 17 13 19Z" fill="#292d27"/>
