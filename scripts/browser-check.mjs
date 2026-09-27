@@ -17,6 +17,8 @@ export async function runBrowserChecks({
     console.log(row);
   }
   await p.goto(base);
+  await p.cdp("Network.setCacheDisabled", { cacheDisabled: true });
+  await p.reload();
   await p.cdp("Emulation.setDeviceMetricsOverride", {
     width: 1500,
     height: 900,

@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-27T02:08:16.075Z",
+        "reason": "Agent review: body overflow-x clips only decorative positioned landing illustrations; this page has no escaping interactive popovers. Drawing settings are in the separate demo page."
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-27T02:08:16.094Z",
+        "reason": "Agent review: reported #57878c shadow is the existing offset pen-illustration shadow on light paper/white, not a dark page or zero-offset glow; screenshot and landing.css confirmed."
+      }
+    ]
+  }
+}
