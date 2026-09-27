@@ -104,6 +104,9 @@ export async function runBrowserChecks({
       portableCanvas.revision === portableCanvas.savedRevision,
   );
   pass("Finger touch drawing and autosave");
+  if (await p.evaluate(() => portableCanvas.panel?.hidden)) {
+    await p.click('loc=css:button[data-action="pen"]');
+  }
   await p.click('loc=css:button[data-action="input"]');
   await p.cdp("Input.dispatchTouchEvent", {
     type: "touchStart",
@@ -123,6 +126,18 @@ export async function runBrowserChecks({
   const result = await p.evaluate(async () => {
     const c = portableCanvas,
       results = {};
+    const canonical = (value) =>
+      Array.isArray(value)
+        ? value.map(canonical)
+        : value && typeof value === "object"
+          ? Object.fromEntries(
+              Object.keys(value)
+                .sort()
+                .map((key) => [key, canonical(value[key])]),
+            )
+          : value;
+    const sameData = (a, b) =>
+      JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
     const ink = () => {
       const d = c.ctx.getImageData(0, 0, c.canvas.width, c.canvas.height).data;
       let n = 0;
@@ -154,13 +169,12 @@ export async function runBrowserChecks({
     results.inkUndo = ink(); // Canvas readback can switch raster backends; tolerate <=0.1% edge pixels, but require exact stroke restoration.
     results.undo =
       Math.abs(ink() - before) <= Math.max(4, before * 0.001) &&
-      JSON.stringify(c.strokes) === JSON.stringify(original.strokes);
+      sameData(c.strokes, original.strokes);
     c.redo();
     await c.save();
     results.redo = ink() < before;
     await c.import(original);
-    results.backup =
-      JSON.stringify(c.export().strokes) === JSON.stringify(original.strokes);
+    results.backup = sameData(c.export().strokes, original.strokes);
     try {
       await c.import({
         ...original,
@@ -168,8 +182,7 @@ export async function runBrowserChecks({
       });
       results.invalid = false;
     } catch {
-      results.invalid =
-        JSON.stringify(c.export().strokes) === JSON.stringify(original.strokes);
+      results.invalid = sameData(c.export().strokes, original.strokes);
     }
     // Save rejection must keep the active key and drawing available.
     const realSave = c.store.save.bind(c.store);
