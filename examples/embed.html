@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Embedding Portable Canvas</title
+  ><style>
+    body {
+      max-width: 720px;
+      margin: 80px auto;
+      padding: 24px;
+      font: 20px/1.7 Georgia;
+      background: #faf7ee;
+      color: #30392c;
+    }
+    section {
+      min-height: 110vh;
+    }
+  </style>
+  <section>
+    <h1>A page with a margin</h1>
+    <p>
+      Tap the floating pen and draw here. Scroll down to see the ink remain
+      anchored to this document.
+    </p>
+  </section>
+  <section>
+    <h2>Another thought</h2>
+    <p>This is still the same page, with the same saved drawing.</p>
+  </section>
+  <script type="module">
+    import { mount } from "../src/widget.js";
+    window.canvas = mount({ key: "example:stable-article-id" });
+  </script>
+</html>
