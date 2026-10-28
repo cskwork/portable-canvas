@@ -82,3 +82,30 @@ test("legacy pressure remains exact while modern pens and fountain differ", asyn
   assert.ok(strokeWidth(fountain, 0.1) < strokeWidth(fountain, 1));
   assert.equal(strokeWidth({ ...fountain, sensitivity: 0 }, 0.1), stroke.width);
 });
+
+test("pasted addresses with surrounding whitespace open the intended site", async () => {
+  const { safeAddress } = await import("../src/model.js");
+  assert.equal(safeAddress("  example.com "), "https://example.com/");
+  assert.equal(safeAddress("\thttps://example.com/a\n"), "https://example.com/a");
+});
+
+test("page keys drop only the fragment and retention evicts by page count", async () => {
+  const { pageKey, retentionPlan } = await import("../src/model.js");
+  assert.equal(
+    pageKey("https://example.com/a?b=1#section"),
+    "https://example.com/a?b=1",
+  );
+  const records = [
+    { key: "new", bytes: 1, accessed: 3 },
+    { key: "old", bytes: 1, accessed: 1 },
+    { key: "active", bytes: 1, accessed: 0 },
+  ];
+  assert.deepEqual(
+    retentionPlan(records, "active", 1, { maxBytes: 100, maxPages: 2 }),
+    ["old"],
+  );
+  assert.throws(
+    () => retentionPlan(records, "active", 101, { maxBytes: 100, maxPages: 2 }),
+    /storage budget/,
+  );
+});

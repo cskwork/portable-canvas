@@ -11,7 +11,8 @@ export function pageKey(value = location.href) {
   return url.href;
 }
 export function safeAddress(value) {
-  const url = new URL(value.includes("://") ? value : `https://${value}`);
+  const raw = value.trim();
+  const url = new URL(raw.includes("://") ? raw : `https://${raw}`);
   if (
     !["http:", "https:"].includes(url.protocol) ||
     url.username ||

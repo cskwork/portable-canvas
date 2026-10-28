@@ -32,7 +32,7 @@ Browser storage is origin/profile/device specific and can be cleared or evicted.
 
 ## Confirmed drawing-UI revision
 
-The user confirmed the Millie-supplied UI screenshot published on 2024-12-18: https://www.donga.com/news/Economy/article/all/20241218/130672732/2 . The reference was inspected visually; the current Millie app was not operated. The implementation follows the shown white icon bar, yellow slider controls, per-tool panels and round palette. The third-party reference image is not distributed in this repository.
+The user confirmed a Millie-supplied UI screenshot from a news article published on 2024-12-18. The reference was inspected visually; the current Millie app was not operated. The implementation follows the shown white icon bar, yellow slider controls, per-tool panels and round palette. The third-party reference image is not distributed in this repository.
 
 - Current Node suite: 17 passing tests, adding optional brush fields, legacy width behavior, isolated tool preferences and per-stroke compositing checks.
 - Existing 13 browser regressions passed with the new toolbar. The new 9-case brush/UI suite passed: panel toggling, keyboard/range controls, per-tool reload persistence, real highlighter/eraser input, pressure sensitivity and styled-drawing restoration. `npm run test:browser` now runs both suites.
