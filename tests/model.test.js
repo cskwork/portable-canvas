@@ -82,3 +82,9 @@ test("legacy pressure remains exact while modern pens and fountain differ", asyn
   assert.ok(strokeWidth(fountain, 0.1) < strokeWidth(fountain, 1));
   assert.equal(strokeWidth({ ...fountain, sensitivity: 0 }, 0.1), stroke.width);
 });
+
+test("pasted addresses with surrounding whitespace open the intended site", async () => {
+  const { safeAddress } = await import("../src/model.js");
+  assert.equal(safeAddress("  example.com "), "https://example.com/");
+  assert.equal(safeAddress("\thttps://example.com/a\n"), "https://example.com/a");
+});
